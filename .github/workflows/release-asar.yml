@@ -1,0 +1,64 @@
+name: Build and Release Patched ASAR
+
+on:
+  workflow_dispatch:
+    inputs:
+      antigravity_version:
+        description: 'Antigravity Version (e.g. 2.28.0)'
+        required: true
+        default: '2.28.0'
+      execution_id:
+        description: 'Build Execution ID'
+        required: true
+        default: '6410674700681216'
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download Official Antigravity tarball
+        run: |
+          VERSION="${{ github.event.inputs.antigravity_version || '2.28.0' }}"
+          EXEC_ID="${{ github.event.inputs.execution_id || '6410674700681216' }}"
+          URL="https://storage.googleapis.com/antigravity-public/antigravity-hub/${VERSION}-${EXEC_ID}/linux-x64/Antigravity.tar.gz"
+          echo "Downloading $URL ..."
+          curl -L -o Antigravity.tar.gz "$URL"
+          tar -xzf Antigravity.tar.gz
+
+      - name: Run Patch & Build Patched ASAR
+        run: |
+          chmod +x install.sh
+          python3 install.py --path Antigravity-x64/resources/app.asar
+          cp Antigravity-x64/resources/app.asar ./app.asar
+          zip -r app.asar.zip app.asar Antigravity-x64/resources/app.asar.unpacked
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: patched-app-asar
+          path: app.asar.zip
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            app.asar.zip
+            app.asar
+          generate_release_notes: true
