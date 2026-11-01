@@ -4,6 +4,8 @@
     // 逻辑：不再仅仅检查当前标签，而是向上回溯父级，识别“代码/编辑器”禁区
     const USE_TW = false;
     const map = new Map(Object.entries({
+    "run-workflow": "动态工作流",
+    "Interactive guide to design and create a scheduled background automation. Use this skill when the user wants to create an automated or recurring scheduled task (e.g. \"summarize my emails every morning\", \"every Monday send me a to-do list\"). Also triggered by the /automation slash command.": "设计并创建定时后台自动化任务的交互式指南。当用户希望创建自动化或周期性定时任务（例如“每天早晨总结我的未读邮件”、“每周一向我发送待办清单”）时使用本技能。也可以通过 /automation 斜杠命令触发。",
     "Featured": "精选推荐",
     "Details": "详情",
     "Added": "已添加",
