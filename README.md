@@ -58,7 +58,10 @@ cd antigravity-chinese
 .\install.ps1
 ```
 
-*脚本会自动检测 Antigravity 的安装目录，备份原始文件并自动注入汉化补丁。完成后重启软件即可！*
+*脚本会自动检测 Antigravity 的安装目录，备份原始文件并自动注入汉化补丁。*
+
+> [!TIP]
+> 安装前建议彻底退出 Antigravity（包括系统托盘图标）。完成后重新打开软件即可生效！
 
 ---
 

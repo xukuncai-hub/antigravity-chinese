@@ -7,13 +7,22 @@ Google Antigravity 跨平台中文汉化一键安装/还原脚本
 
 import os
 import sys
+import json
 import shutil
 import platform
 import subprocess
 import argparse
 from pathlib import Path
 
-VERSION = "1.0.0"
+# 确保 Windows 下终端输出 UTF-8，防止 GBK 编码崩溃
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+VERSION = "1.0.1"
 
 # ANSI 颜色定义
 COLOR_RESET = "\033[0m"
@@ -38,6 +47,27 @@ def print_warn(msg):
 
 def print_error(msg):
     print(f"{COLOR_RED}{COLOR_BOLD}[错误]{COLOR_RESET} {msg}")
+
+
+def is_antigravity_running():
+    """检查 Antigravity 进程是否在运行"""
+    try:
+        if platform.system() == "Windows":
+            out = subprocess.check_output(
+                ["tasklist", "/fi", "imagename eq Antigravity.exe", "/fo", "csv"],
+                text=True,
+                stderr=subprocess.DEVNULL,
+            )
+            return "Antigravity.exe" in out
+        else:
+            out = subprocess.check_output(
+                ["pgrep", "-i", "antigravity"],
+                text=True,
+                stderr=subprocess.DEVNULL,
+            )
+            return bool(out.strip())
+    except Exception:
+        return False
 
 
 def detect_asar_path():
@@ -65,9 +95,15 @@ def detect_asar_path():
             candidates.append(
                 Path(local_app_data) / "Programs/Antigravity/resources/app.asar"
             )
+            candidates.append(
+                Path(local_app_data) / "Programs/antigravity/resources/app.asar"
+            )
         if program_files:
             candidates.append(
                 Path(program_files) / "Antigravity/resources/app.asar"
+            )
+            candidates.append(
+                Path(program_files) / "antigravity/resources/app.asar"
             )
 
     for p in candidates:
@@ -83,11 +119,13 @@ def check_tool(tool_name):
 
 
 def ensure_asar_cli():
-    """确保 asar 工具可用"""
-    if check_tool("asar"):
-        return ["asar"]
-    if check_tool("npx"):
-        return ["npx", "--yes", "asar"]
+    """确保 asar 工具可用（兼容 Windows .cmd 扩展与 UNIX）"""
+    asar = shutil.which("asar")
+    if asar:
+        return [asar]
+    npx = shutil.which("npx")
+    if npx:
+        return [npx, "--yes", "asar"]
     return None
 
 
@@ -106,7 +144,7 @@ def run_cmd(cmd, cwd=None):
 
 def patch_files(extract_dir, src_dir):
     """修改解包后的 JS 文件"""
-    # 1. 注入 preload.js
+    # 1. 注入 preload.js（支持全量初装、无损升级与修复覆盖）
     preload_file = extract_dir / "dist/preload.js"
     patch_file = src_dir / "preload_patch.js"
 
@@ -116,15 +154,28 @@ def patch_files(extract_dir, src_dir):
         raise FileNotFoundError(f"未找到补丁文件 {patch_file}")
 
     preload_code = preload_file.read_text(encoding="utf-8")
-    if "/* --- ANTIGRAVITY CHINESE LOCALIZATION START --- */" not in preload_code:
-        patch_code = patch_file.read_text(encoding="utf-8")
+    start_marker = "/* --- ANTIGRAVITY CHINESE LOCALIZATION START --- */"
+    end_marker = "/* --- ANTIGRAVITY CHINESE LOCALIZATION END --- */"
+    patch_code = patch_file.read_text(encoding="utf-8").strip()
+
+    if start_marker in preload_code and end_marker in preload_code:
+        before = preload_code.split(start_marker)[0].rstrip()
+        after = preload_code.split(end_marker)[1].lstrip()
+        new_code = before + "\n\n" + patch_code + "\n\n" + after
+        preload_file.write_text(new_code.strip() + "\n", encoding="utf-8")
+        print_info("已更新 Web 界面物理隔离汉化引擎 (dist/preload.js)")
+    elif start_marker in preload_code:
+        # 处理历史版本未闭合或损坏的补丁残余
+        before = preload_code.split(start_marker)[0].rstrip()
+        new_code = before + "\n\n" + patch_code + "\n"
+        preload_file.write_text(new_code, encoding="utf-8")
+        print_info("已修复并重新注入 Web 界面物理隔离汉化引擎 (dist/preload.js)")
+    else:
         preload_file.write_text(
             preload_code.rstrip() + "\n\n" + patch_code + "\n",
             encoding="utf-8",
         )
         print_info("已注入 Web 界面物理隔离汉化引擎 (dist/preload.js)")
-    else:
-        print_info("dist/preload.js 已存在汉化引擎，跳过注入")
 
     # 2. 注入 menu.js
     menu_file = extract_dir / "dist/menu.js"
@@ -133,16 +184,19 @@ def patch_files(extract_dir, src_dir):
         menu_code = menu_file.read_text(encoding="utf-8")
         target = "    // Re-apply the menu so the change takes effect.\n    electron_1.Menu.setApplicationMenu(menu);"
         if "Antigravity Native Menu Chinese Translation" not in menu_code and target in menu_code:
-            # 执行简易正则替换
+            patch_path_json = json.dumps(menu_patch_file.resolve().as_posix())
+            menu_path_json = json.dumps(menu_file.resolve().as_posix())
             script = f"""
 const fs = require('fs');
-const patch = require('{menu_patch_file.resolve().as_posix()}');
-let code = fs.readFileSync('{menu_file.resolve().as_posix()}', 'utf8');
+const patch = require({patch_path_json});
+let code = fs.readFileSync({menu_path_json}, 'utf8');
 code = patch.apply(code);
-fs.writeFileSync('{menu_file.resolve().as_posix()}', code, 'utf8');
+fs.writeFileSync({menu_path_json}, code, 'utf8');
 """
             subprocess.run(["node", "-e", script], check=True)
             print_info("已注入原生菜单栏汉化 (dist/menu.js)")
+        else:
+            print_info("dist/menu.js 原生菜单栏汉化已就绪")
 
     # 3. 注入 tray.js
     tray_file = extract_dir / "dist/tray.js"
@@ -150,15 +204,19 @@ fs.writeFileSync('{menu_file.resolve().as_posix()}', code, 'utf8');
     if tray_file.is_file() and tray_patch_file.is_file():
         tray_code = tray_file.read_text(encoding="utf-8")
         if "TRAY TRANSLATION START" not in tray_code:
+            patch_path_json = json.dumps(tray_patch_file.resolve().as_posix())
+            tray_path_json = json.dumps(tray_file.resolve().as_posix())
             script = f"""
 const fs = require('fs');
-const patch = require('{tray_patch_file.resolve().as_posix()}');
-let code = fs.readFileSync('{tray_file.resolve().as_posix()}', 'utf8');
+const patch = require({patch_path_json});
+let code = fs.readFileSync({tray_path_json}, 'utf8');
 code = patch.apply(code);
-fs.writeFileSync('{tray_file.resolve().as_posix()}', code, 'utf8');
+fs.writeFileSync({tray_path_json}, code, 'utf8');
 """
             subprocess.run(["node", "-e", script], check=True)
             print_info("已注入系统托盘汉化 (dist/tray.js)")
+        else:
+            print_info("dist/tray.js 系统托盘汉化已就绪")
 
     # 4. 注入 updater.js
     updater_file = extract_dir / "dist/updater.js"
@@ -166,15 +224,19 @@ fs.writeFileSync('{tray_file.resolve().as_posix()}', code, 'utf8');
     if updater_file.is_file() and updater_patch_file.is_file():
         updater_code = updater_file.read_text(encoding="utf-8")
         if "暂无可用更新" not in updater_code:
+            patch_path_json = json.dumps(updater_patch_file.resolve().as_posix())
+            updater_path_json = json.dumps(updater_file.resolve().as_posix())
             script = f"""
 const fs = require('fs');
-const patch = require('{updater_patch_file.resolve().as_posix()}');
-let code = fs.readFileSync('{updater_file.resolve().as_posix()}', 'utf8');
+const patch = require({patch_path_json});
+let code = fs.readFileSync({updater_path_json}, 'utf8');
 code = patch.apply(code);
-fs.writeFileSync('{updater_file.resolve().as_posix()}', code, 'utf8');
+fs.writeFileSync({updater_path_json}, code, 'utf8');
 """
             subprocess.run(["node", "-e", script], check=True)
             print_info("已注入更新弹窗汉化 (dist/updater.js)")
+        else:
+            print_info("dist/updater.js 更新弹窗汉化已就绪")
 
 
 def install(asar_path):
@@ -184,6 +246,10 @@ def install(asar_path):
         print_error("未检测到 asar 或 npx 工具！请确保已安装 Node.js。")
         print_info("安装方法: https://nodejs.org/")
         sys.exit(1)
+
+    if is_antigravity_running():
+        print_warn("⚠️  检测到 Antigravity 正在运行。")
+        print_warn("建议在安装完成后【完全退出并重启软件】（含右下角系统托盘）以使汉化生效！")
 
     resources_dir = asar_path.parent
     backup_path = resources_dir / "app.asar.bak"
@@ -195,10 +261,10 @@ def install(asar_path):
     else:
         print_info(f"已检测到原版备份: {backup_path} (保留不变)")
 
-    # 准备工作目录
+    # 准备工作临时目录
     temp_dir = Path("/tmp/antigravity_zh_patch") if platform.system() != "Windows" else Path(os.environ.get("TEMP", ".")) / "antigravity_zh_patch"
     if temp_dir.exists():
-        shutil.rmtree(temp_dir)
+        shutil.rmtree(temp_dir, ignore_errors=True)
     temp_dir.mkdir(parents=True, exist_ok=True)
 
     extracted_dir = temp_dir / "extracted"

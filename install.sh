@@ -8,9 +8,13 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-if ! command -v node &> /dev/null && ! command -v npx &> /dev/null; then
-    echo "❌ 错误: 未检测到 Node.js / npx，请先安装 Node.js (https://nodejs.org/)"
+if ! command -v asar &> /dev/null && ! command -v npx &> /dev/null; then
+    echo "❌ 错误: 未检测到 asar 或 npx / Node.js，请先安装 Node.js (https://nodejs.org/)"
     exit 1
+fi
+
+if pgrep -i antigravity > /dev/null 2>&1; then
+    echo "⚠️  提示: 检测到 Antigravity 正在运行中。安装完成后请务必重启 Antigravity 生效！"
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
