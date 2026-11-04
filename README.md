@@ -1,7 +1,7 @@
 # Google Antigravity 中文汉化包 (Antigravity Chinese Localization)
 
 <p align="center">
-  <img src="assets/banner.png" alt="Antigravity Chinese" width="120"/>
+  <img src="https://raw.githubusercontent.com/xukuncai-hub/antigravity-chinese/main/assets/banner.png" alt="Antigravity Chinese" width="120"/>
 </p>
 
 <p align="center">
