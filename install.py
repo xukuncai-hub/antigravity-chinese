@@ -22,7 +22,7 @@ if sys.platform == "win32":
     except Exception:
         pass
 
-VERSION = "1.0.4"
+VERSION = "1.0.5"
 
 # ANSI 颜色定义
 COLOR_RESET = "\033[0m"
@@ -239,6 +239,26 @@ fs.writeFileSync({updater_path_json}, code, 'utf8');
             print_info("dist/updater.js 更新弹窗汉化已就绪")
 
 
+def patch_builtin_skills(script_dir):
+    """汉化内置技能 (builtin skills)"""
+    skills_zh_dir = script_dir / "builtin_skills_zh"
+    if not skills_zh_dir.exists():
+        return
+    home = Path.home()
+    target_skills_dir = home / ".gemini/antigravity/builtin/skills"
+    if not target_skills_dir.exists():
+        return
+    count = 0
+    for skill_path in skills_zh_dir.iterdir():
+        if skill_path.is_dir() and (skill_path / "SKILL.md").exists():
+            dest = target_skills_dir / skill_path.name
+            if dest.exists():
+                shutil.copy2(skill_path / "SKILL.md", dest / "SKILL.md")
+                count += 1
+    if count > 0:
+        print_info(f"已同步汉化内置技能 ({count} 项)")
+
+
 def install(asar_path):
     print_info(f"目标 app.asar 路径: {asar_path}")
     asar_cmd = ensure_asar_cli()
@@ -285,6 +305,9 @@ def install(asar_path):
 
         print_info("正在替换并应用新版本...")
         shutil.copy2(output_asar, asar_path)
+
+        # 汉化内置技能
+        patch_builtin_skills(script_dir)
 
         unpacked_src = temp_dir / "app.asar.unpacked"
         unpacked_dest = resources_dir / "app.asar.unpacked"

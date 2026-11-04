@@ -57,8 +57,9 @@ git clone https://github.com/xukuncai-hub/antigravity-chinese.git
 cd antigravity-chinese
 .\install.ps1
 ```
+*或者直接双击运行目录下的 install.bat 即可一键完成汉化。*
 
-*脚本会自动检测 Antigravity 的安装目录，备份原始文件并自动注入汉化补丁。*
+*脚本会自动检测 Antigravity 的安装目录，备份原始文件并自动注入汉化补丁，同时自动同步汉化内置技能。*
 
 > [!TIP]
 > 安装前建议彻底退出 Antigravity（包括系统托盘图标）。完成后重新打开软件即可生效！
