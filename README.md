@@ -1,7 +1,7 @@
 # Google Antigravity 中文汉化包 (Antigravity Chinese Localization)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/xukuncai-hub/antigravity-chinese/main/assets/banner.png" alt="Antigravity Chinese" width="120"/>
+  <img src="./assets/banner.png" alt="Antigravity Chinese" width="120"/>
 </p>
 
 <p align="center">
@@ -87,6 +87,12 @@ chmod +x install.sh
 ---
 
 ## 📝 最近更新日志
+
+### [v1.0.8] - 2026-11-13
+- **适配 Antigravity 2.31.2**：精准更新多处补丁锚点，全面兼容官方最新版本。
+- **禁用后台静默自动更新**：在更新补丁中默认将 `autoDownload` 设置为 `false`，彻底解决官方后台静默下载覆盖导致汉化和代理失效的问题。
+- **原生 Node.js 安装脚本**：新增纯 Node.js 安装器 `install.js`，实现无需 Python 运行环境即可一键解包与注入；`install.bat` 升级为优先使用 Node.js 运行。
+- **主页 Banner 路径优化**：修复主页 Banner 图片在网络受限环境下的加载问题。
 
 ### [v1.0.6] - 2026-11-04
 - **全方位设置与面板汉化**：全面逆向提取并汉化 Antigravity 2.29.0 中的常规设置、外观、快捷键动作、辅助侧边栏、终端沙箱配置与全量交互对话框（共新增 695 条核心词条）。
