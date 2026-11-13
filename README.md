@@ -1,7 +1,7 @@
 # Google Antigravity 中文汉化包 (Antigravity Chinese Localization)
 
 <p align="center">
-  <img src="./assets/banner.png" alt="Antigravity Chinese" width="120"/>
+  <img src="./assets/banner.png" alt="Google Antigravity Chinese Localization" width="120"/>
 </p>
 
 <p align="center">
@@ -10,14 +10,29 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/xukuncai-hub/antigravity-chinese/stargazers"><img src="https://img.shields.io/github/stars/xukuncai-hub/antigravity-chinese?style=flat-square&logo=github&color=gold" alt="Stars"></a>
+  <a href="https://github.com/xukuncai-hub/antigravity-chinese/releases"><img src="https://img.shields.io/github/v/release/xukuncai-hub/antigravity-chinese?style=flat-square&color=blue&logo=github" alt="Release"></a>
+  <img src="https://img.shields.io/badge/Antigravity-v2.31.2%20%E5%AE%8C%E7%BE%8E%E9%80%82%E9%85%8D-brightgreen?style=flat-square" alt="Compatible">
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=flat-square" alt="Platform">
+  <a href="https://github.com/xukuncai-hub/antigravity-chinese/blob/main/LICENSE"><img src="https://img.shields.io/github/license/xukuncai-hub/antigravity-chinese?style=flat-square" alt="License"></a>
+  <a href="https://github.com/xukuncai-hub/antigravity-chinese/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
+</p>
+
+<p align="center">
   <a href="#-特性亮点">特性亮点</a> •
+  <a href="#-对比优势">对比优势</a> •
   <a href="#-快速开始">快速开始</a> •
+  <a href="#-搭配推荐网络加速">搭配网络加速</a> •
   <a href="#-手动安装免环境依赖">手动替换</a> •
   <a href="#-工作原理">核心原理</a> •
   <a href="#-更新记录">更新日志</a> •
-  <a href="#-一键还原">一键还原</a> •
-  <a href="#-常见问题">常见问题</a>
+  <a href="#-常见问题-faq">常见问题</a>
 </p>
+
+---
+
+> [!TIP]
+> 🚀 **国内网络加速推荐**：如果您在使用 Antigravity 时遇到连接超时、网络卡顿，或者必须开启全局代理 / TUN 虚拟网卡才能使用，强烈推荐搭配使用我们的兄弟项目：**[Google Antigravity 智能代理适配与专线加速引擎 (antigravity-proxy)](https://github.com/xukuncai-hub/antigravity-proxy)**，免开 TUN、免全局模式，完美支持普通系统代理与规则模式！
 
 ---
 
@@ -33,8 +48,21 @@
   - **辅助侧边栏（Auxiliary Pane）**：子智能体（Subagents）、后台任务（Background Tasks）、工件（Artifacts）、文件变更（Files Changed）、终端（Terminals）完整汉化；
   - **原生菜单栏与托盘**：顶部原生菜单（文件、编辑、视图、窗口等）与系统托盘右键菜单全量覆盖；
   - **内置技能自动同步**：自动检测并同步汉化 `~/.gemini/antigravity/builtin/skills` 下的所有官方内置技能。
-- 🔄 **版本更新无痛适配**：官方推送更新后，仅需双击运行一次安装脚本即可秒级重新注入适配，无需苦等第三方版本发布。
-- 💻 **全平台支持**：支持 Windows、macOS 与 Linux。
+- 🔄 **版本更新无痛适配**：官方推送更新后，仅需双击运行一次安装脚本即可秒级重新注入适配；默认禁用后台静默自动下载，杜绝补丁被无声覆盖。
+- 💻 **跨平台支持**：全面兼容 Windows、macOS 与 Linux。
+
+---
+
+## 📊 对比优势
+
+| 维度 | Google 原生英文版 | 传统通用翻译插件 | 本汉化包 (Antigravity Chinese) |
+| :--- | :---: | :---: | :---: |
+| **界面语言** | 纯英文 | 部分翻译 / 页面漂移 | **纯正原生级全量中文** |
+| **代码区保护** | 原生 | 经常误翻变量/注释/路径 | **物理级 DOM 隔离，绝对不碰代码** |
+| **插件市场与技能** | 纯英文 | 无法抓取动态加载内容 | **全量 67 款插件 + 576 项技能汉化** |
+| **设置与原生菜单** | 纯英文 | 无法处理 Electron 原生层 | **菜单栏 + 托盘 + 设置中心全量覆盖** |
+| **安装与卸载** | - | 依赖扩展商店 | **双击脚本一秒部署，支持一键无痛还原** |
+| **静默覆盖防护** | 官方后台覆盖 | 覆盖即失效 | **内置防静默覆盖补丁，稳定持久** |
 
 ---
 
@@ -42,7 +70,7 @@
 
 ### 前置要求
 - 已安装 **Google Antigravity**；
-- 系统已安装 **Python 3** 与 **Node.js / npx**（用于解包与打包 asar）。
+- 系统已安装 **Node.js**（推荐）或 **Python 3**。
 
 ### 方式一：一键自动安装（推荐）
 
@@ -72,11 +100,24 @@ chmod +x install.sh
 
 ---
 
+## 🔌 搭配推荐：网络加速
+
+如果你在中国大陆网络环境下使用 Google Antigravity，经常会遇到 **“核心断连、模型无响应、必须开启虚拟网卡 (TUN) 或全局模式”** 的网络痛点。
+
+我们开发了专用的网络自适应加速引擎：
+👉 **[Google Antigravity 智能代理适配与专线加速引擎 (antigravity-proxy)](https://github.com/xukuncai-hub/antigravity-proxy)**
+
+- ⚡ **突破底层 Go 核心代理限制**：彻底免去开启虚拟网卡 (TUN) 驱动；
+- ⚡ **支持常用规则模式**：国内网站满速直连，不再受全局模式拖慢；
+- ⚡ **智能感知与自动分流**：Clash Verge / Clash / v2rayN 等常见客户端即插即用。
+
+---
+
 ## 📦 手动安装（免环境依赖）
 
 如果你没有安装 Node.js 环境，可以直接下载我们预先打包好的 `app.asar` 文件直接替换：
 
-1. 前往 **[Releases 页面](https://github.com/xukuncai-hub/antigravity-chinese/releases)** 下载最新版本的 `app.asar`；
+1. 前往 **[Releases 页面](https://github.com/xukuncai-hub/antigravity-chinese/releases)** 下载对应版本的 `app.asar`；
 2. 找到你的 Antigravity 安装目录下的 `resources` 文件夹：
    - **Windows**: `C:\Users\<你的用户名>\AppData\Local\Programs\Antigravity\resources\`
    - **macOS**: `/Applications/Antigravity.app/Contents/Resources/`
@@ -112,9 +153,9 @@ chmod +x install.sh
 如果需要恢复为 Google 官方原生英文版：
 
 ```bash
-python3 install.py --restore
+node install.js --restore
 ```
-或直接将之前备份的 `app.asar.bak` 改回 `app.asar` 即可。
+*(若系统安装了 Python 也可以运行 `python3 install.py --restore`)*，或直接将之前备份的 `app.asar.bak` 改回 `app.asar` 即可。
 
 ---
 
@@ -146,17 +187,36 @@ flowchart TD
 <details>
 <summary><b>Q2: 提示「未自动找到 Antigravity 的 app.asar 文件」怎么办？</b></summary>
 可以使用 <code>--path</code> 参数手动指定路径，例如：<br>
-<code>python3 install.py --path /your/custom/path/resources/app.asar</code>
+<code>node install.js --path /your/custom/path/resources/app.asar</code>
 </details>
 
 <details>
 <summary><b>Q3: 软件更新后汉化失效了怎么办？</b></summary>
-Google Antigravity 每次推送新版本会自动重置 <code>app.asar</code>。更新完成后，进入本仓库双击 <code>install.bat</code>（或执行 <code>.\install.ps1</code> / <code>./install.sh</code>）即可秒级重新注入并恢复汉化！
+在 v1.0.8 及更高版本中，补丁已默认禁用后台静默下载，减少自动覆盖情况。若您主动更新了官方版本，只需进入本仓库重新双击 <code>install.bat</code> 即可秒级重新注入并恢复汉化！
 </details>
+
+<details>
+<summary><b>Q4: 是否支持 macOS 和 Linux？</b></summary>
+支持。在 macOS 和 Linux 终端中运行 <code>./install.sh</code> 即可自动适配并注入。
+</details>
+
+---
+
+## 🌐 English Introduction
+
+**Google Antigravity Chinese Localization Package** provides a native-like, high-performance Chinese translation experience for Google Antigravity (the agentic AI development environment). Features include:
+- **Zero Interference with Code**: Strict DOM isolation ensures code editors (Monaco), terminals, and AI prompt inputs remain 100% untouched.
+- **Full Coverage**: Translates UI, native menus, settings, and over 67 marketplace plugins + 576 extension skills.
+- **One-Click Setup**: Zero-configuration installer script for Windows, macOS, and Linux.
+
+---
+
+## 🔍 搜索关键词 (Keywords)
+
+`Google Antigravity 汉化` · `Antigravity 中文包` · `Antigravity 汉化补丁` · `Antigravity Chinese Localization` · `Antigravity 界面汉化` · `Google AI IDE 汉化` · `Gemini Antigravity 中文` · `Antigravity 插件汉化` · `Antigravity 设置中文` · `Antigravity 教程` · `DeepMind Antigravity`
 
 ---
 
 ## 📄 开源许可证
 
-本项目基于 [MIT License](LICENSE) 开源。
-欢迎提交 Issue 和 Pull Request 一起完善汉化词库！
+本项目基于 [MIT License](LICENSE) 开源。欢迎提交 Issue 和 Pull Request 一起完善汉化词库！
