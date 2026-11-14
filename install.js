@@ -9,7 +9,7 @@ const path = require('path');
 const os = require('os');
 const { execSync, spawnSync } = require('child_process');
 
-const VERSION = '1.0.8';
+const VERSION = '1.0.9';
 
 // ANSI 颜色
 const COLOR_RESET = '\x1b[0m';
@@ -53,6 +53,19 @@ function detectAsarPath() {
         if (fs.existsSync(p) && fs.statSync(p).isFile()) return p;
     }
     return null;
+}
+
+function cleanPendingUpdates() {
+    try {
+        const local = process.env.LOCALAPPDATA;
+        if (local) {
+            const updaterDir = path.join(local, 'antigravity-updater');
+            if (fs.existsSync(updaterDir)) {
+                fs.rmSync(updaterDir, { recursive: true, force: true });
+                printInfo('已清理残留的后台更新安装缓存 (antigravity-updater)');
+            }
+        }
+    } catch (_) {}
 }
 
 function patchFiles(extractDir, srcDir) {
@@ -154,6 +167,7 @@ function install(asarPath) {
 
         printInfo('正在替换并应用新版本...');
         fs.copyFileSync(outputAsar, asarPath);
+        cleanPendingUpdates();
 
         patchBuiltinSkills(scriptDir);
 

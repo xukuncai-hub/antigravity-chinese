@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://github.com/xukuncai-hub/antigravity-chinese/stargazers"><img src="https://img.shields.io/github/stars/xukuncai-hub/antigravity-chinese?style=flat-square&logo=github&color=gold" alt="Stars"></a>
   <a href="https://github.com/xukuncai-hub/antigravity-chinese/releases"><img src="https://img.shields.io/github/v/release/xukuncai-hub/antigravity-chinese?style=flat-square&color=blue&logo=github" alt="Release"></a>
-  <img src="https://img.shields.io/badge/Antigravity-v2.31.2%20%E5%AE%8C%E7%BE%8E%E9%80%82%E9%85%8D-brightgreen?style=flat-square" alt="Compatible">
+  <img src="https://img.shields.io/badge/Antigravity-v2.32.1%20%E5%AE%8C%E7%BE%8E%E9%80%82%E9%85%8D-brightgreen?style=flat-square" alt="Compatible">
   <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=flat-square" alt="Platform">
   <a href="https://github.com/xukuncai-hub/antigravity-chinese/blob/main/LICENSE"><img src="https://img.shields.io/github/license/xukuncai-hub/antigravity-chinese?style=flat-square" alt="License"></a>
   <a href="https://github.com/xukuncai-hub/antigravity-chinese/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
@@ -128,6 +128,10 @@ chmod +x install.sh
 ---
 
 ## 📝 最近更新日志
+
+### [v1.0.9] - 2026-11-14
+- **适配 Antigravity 2.32.1**：全面兼容官方最新发布的 2.32.1 版本。
+- **四重防静默覆盖机制**：新增禁用退出时静默安装、拦截后台定时轮询检查、拦截后台核心进程更新调用，并自动清除残留安装包缓存，彻底杜绝无感覆盖。
 
 ### [v1.0.8] - 2026-11-13
 - **适配 Antigravity 2.31.2**：精准更新多处补丁锚点，全面兼容官方最新版本。
