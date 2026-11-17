@@ -9,7 +9,7 @@ const path = require('path');
 const os = require('os');
 const { execSync, spawnSync } = require('child_process');
 
-const VERSION = '1.0.9';
+const VERSION = '1.1.0';
 
 // ANSI 颜色
 const COLOR_RESET = '\x1b[0m';
@@ -62,7 +62,28 @@ function cleanPendingUpdates() {
             const updaterDir = path.join(local, 'antigravity-updater');
             if (fs.existsSync(updaterDir)) {
                 fs.rmSync(updaterDir, { recursive: true, force: true });
-                printInfo('已清理残留的后台更新安装缓存 (antigravity-updater)');
+            }
+            try {
+                fs.writeFileSync(updaterDir, '');
+                if (process.platform === 'win32') {
+                    const { execSync } = require('child_process');
+                    execSync(`attrib +R "${updaterDir}"`, { stdio: 'ignore' });
+                }
+                printInfo('已创建后台更新目录物理阻断文件 (antigravity-updater)');
+            } catch (_) {}
+        }
+    } catch (_) {}
+}
+
+function freezeAppUpdateYml(asarPath) {
+    try {
+        const resourcesDir = path.dirname(asarPath);
+        const ymlPath = path.join(resourcesDir, 'app-update.yml');
+        if (fs.existsSync(ymlPath)) {
+            const content = fs.readFileSync(ymlPath, 'utf8');
+            if (!content.includes('127.0.0.1:0')) {
+                fs.writeFileSync(ymlPath, 'provider: generic\nurl: http://127.0.0.1:0/\nupdaterCacheDirName: antigravity-updater\n', 'utf8');
+                printInfo('已重定向 app-update.yml 阻止静默联网更新');
             }
         }
     } catch (_) {}
@@ -168,6 +189,7 @@ function install(asarPath) {
         printInfo('正在替换并应用新版本...');
         fs.copyFileSync(outputAsar, asarPath);
         cleanPendingUpdates();
+        freezeAppUpdateYml(asarPath);
 
         patchBuiltinSkills(scriptDir);
 

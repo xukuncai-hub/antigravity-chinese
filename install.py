@@ -22,7 +22,7 @@ if sys.platform == "win32":
     except Exception:
         pass
 
-VERSION = "1.0.9"
+VERSION = "1.1.0"
 
 # ANSI 颜色定义
 COLOR_RESET = "\033[0m"

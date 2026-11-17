@@ -1,43 +1,53 @@
-// Antigravity Updater Dialogs Localization Patch & Anti-Overwrite Protection
+// Antigravity Updater Localization & Complete Update Freeze Patch
 module.exports = {
   apply(updaterCode) {
     let patched = updaterCode;
-    const t = `                type: 'info',
-                title: 'Check for Updates',
-                message: 'No updates available',
-                buttons: ['OK'],`;
-    const r = `                type: 'info',
-                title: '检查更新',
-                message: '暂无可用更新',
-                buttons: ['确定'],`;
-    if (patched.includes(t)) {
-      patched = patched.replace(t, r);
-    }
-
-    // 1. 关闭后台静默自动下载
-    if (patched.includes('electron_updater_1.autoUpdater.autoDownload = true;')) {
-      patched = patched.replace('electron_updater_1.autoUpdater.autoDownload = true;', 'electron_updater_1.autoUpdater.autoDownload = false;');
-    }
-
-    // 2. 关闭软件退出时静默安装更新
-    if (patched.includes('electron_updater_1.autoUpdater.autoInstallOnAppQuit = electron_1.app.isPackaged;')) {
-      patched = patched.replace('electron_updater_1.autoUpdater.autoInstallOnAppQuit = electron_1.app.isPackaged;', 'electron_updater_1.autoUpdater.autoInstallOnAppQuit = false;');
-    }
-
-    // 3. 拦截后台静默定时轮询，仅在用户手动点击菜单「检查更新」时允许检查
-    if (patched.includes('function checkForUpdates(isManual = false) {')) {
+    
+    // 1. 完全切断 initAutoUpdater 内部的自动初始化与后台监听
+    if (patched.includes('function initAutoUpdater(isHeadless, settingsService) {')) {
       patched = patched.replace(
-        'function checkForUpdates(isManual = false) {',
-        'function checkForUpdates(isManual = false) {\n    if (!isManual) return;'
+        'function initAutoUpdater(isHeadless, settingsService) {',
+        'function initAutoUpdater(isHeadless, settingsService) {\n    return;'
       );
     }
 
-    // 4. 拦截后台核心进程触发的静默更新
+    // 2. 拦截所有 checkForUpdates 调用，手动触发时弹出友好中文提示，完全不请求远端
+    const checkFunc = 'function checkForUpdates(isManual = false) {';
+    if (patched.includes(checkFunc)) {
+      patched = patched.replace(
+        checkFunc,
+        `function checkForUpdates(isManual = false) {
+    if (isManual) {
+        try {
+            const win = (0, utils_1.getFocusedHubWindow)() ?? (0, utils_1.getHubWindows)()[0];
+            const opts = {
+                type: 'info',
+                title: '检查更新',
+                message: '当前已是稳定版本，自动更新已安全托管。',
+                buttons: ['确定']
+            };
+            if (win) electron_1.dialog.showMessageBox(win, opts);
+            else electron_1.dialog.showMessageBox(opts);
+        } catch (_) {}
+    }
+    return;`
+      );
+    }
+
+    // 3. 拦截语言服务器或任何后台发起的更新动作
     if (patched.includes('function applyHostUpdate() {')) {
       patched = patched.replace(
         'function applyHostUpdate() {',
         'function applyHostUpdate() {\n    return false;'
       );
+    }
+
+    // 4. 彻底禁用 autoDownload 和 autoInstallOnAppQuit
+    if (patched.includes('electron_updater_1.autoUpdater.autoDownload = true;')) {
+      patched = patched.replace('electron_updater_1.autoUpdater.autoDownload = true;', 'electron_updater_1.autoUpdater.autoDownload = false;');
+    }
+    if (patched.includes('electron_updater_1.autoUpdater.autoInstallOnAppQuit = electron_1.app.isPackaged;')) {
+      patched = patched.replace('electron_updater_1.autoUpdater.autoInstallOnAppQuit = electron_1.app.isPackaged;', 'electron_updater_1.autoUpdater.autoInstallOnAppQuit = false;');
     }
 
     return patched;
